@@ -1,43 +1,39 @@
 package com.socialmediaapp.myapp;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.socialmediaapp.myapp.domain.User;
- 
+import com.socialmediaapp.myapp.da.MessageDataObject;
+import com.socialmediaapp.myapp.domain.Message;
+
 @Controller
-public class HomeController 
+@RequestMapping("/app")
+public 	class HomeController {
+	
+	@Autowired
+	MessageDataObject messageDataObject;
+	@RequestMapping(value ="home", method=RequestMethod.GET)
+	public String homeGet(ModelMap model)
 	{
-	
-	@RequestMapping(value = "/login",	 method = RequestMethod.GET)
-	public String login(Locale locale, Model model)
-	{
-	
-		populateModel(model);
-		model.addAttribute("user", new User());
-		return "login";
-	
-	}
-
-	private void populateModel(Model model) {
-		List<String> accountypes = new ArrayList<String>();
-		
-		accountypes.add("Gold");
-		accountypes.add("Silver");
-		accountypes.add("Bronze");
-		accountypes.add("Platinum");
-
-		model.addAttribute("myaccounttype",accountypes);
+		List<Message> messages = messageDataObject.getMessage();
+		model.addAttribute("messages",messages);
+		return "app/home";
 	}
 	
-	@RequestMapping(value = "/login",	 method = RequestMethod.POST)
-	public String loginPost(@ModelAttribute("user") User user , Locale locale, Model model) {
-  model.addAttribute("user", user);
-		populateModel(model);
-		return "login";
+	@RequestMapping(value ="home/{messageId}", method=RequestMethod.GET)
+	public String homeGetMessageById(@PathVariable("messageId") Long messageId, ModelMap model)
+	{
+		Message messageById = messageDataObject.getMessageById(messageId);
+		List<Message> messages = new ArrayList<Message>();
+		messages.add(messageById);
+		model.put("messages", messages);
+		return "app/home";
 	}
 }
